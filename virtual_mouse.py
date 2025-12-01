@@ -64,8 +64,6 @@ while True:
             if length < 40:
                 cv2.circle(img, (lineInfo[4], lineInfo[5]), 15, (0, 255, 0), cv2.FILLED)
                 autopy.mouse.click()
-                # Avoid double click
-                time.sleep(0.5)
 
 
     # FPS Calculation
