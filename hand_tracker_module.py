@@ -26,23 +26,32 @@ class HandTracker:
         return img
     
     def findPosition(self, img, handNo=0, draw=True):
+        xList = []
+        yList = []
+        bbox = []
         self.lmList = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
             for id, lm in enumerate(myHand.landmark):
                 h, w, c = img.shape
                 cx, cy = int(lm.x*w), int(lm.y*h)
+                xList.append(cx)
+                yList.append(cy)
                 self.lmList.append([id, cx, cy])
-                # Hand that is being tracked is highlighted with circles on landmarks
-                if draw:
-                    cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
 
-        return self.lmList
+            xmin, xmax = min(xList), max(xList)
+            ymin, ymax = min(yList), max(yList)
+            bbox = xmin, ymin, xmax, ymax
+
+            if draw:
+                cv2.rectangle(img, (xmin-20, ymin-20), (xmax+20, ymax+20), (0, 255, 0), 2)
+
+        return self.lmList, bbox
     
     def fingersUp(self):
         fingers = []
         # Thumb
-        if self.lmList[4][1] > self.lmList[3][1]:
+        if self.lmList[4][1] < self.lmList[3][1]:
             fingers.append(1)
         else:
             fingers.append(0)
@@ -81,7 +90,7 @@ def main():
     while True:
         success, img = cap.read()
         img = tracker.findHands(img)
-        lmList = tracker.findPosition(img)
+        lmList, bbox = tracker.findPosition(img)
         if len(lmList) != 0:
             print(lmList[4])  # Print the position of the thumb tip (id 4)
 
