@@ -51,10 +51,16 @@ class HandTracker:
     def fingersUp(self):
         fingers = []
         # Thumb
-        if self.lmList[4][1] < self.lmList[3][1]:
-            fingers.append(1)
-        else:
-            fingers.append(0)
+        if self.lmList[1][1] < self.lmList[0][1]: # Right hand
+            if self.lmList[4][1] < self.lmList[3][1]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+        else:  # Left hand
+            if self.lmList[4][1] > self.lmList[3][1]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
         # Fingers
         for id in range(1, 5):
             if self.lmList[id * 4 + 4][2] < self.lmList[id * 4 + 2][2]:
@@ -92,7 +98,7 @@ def main():
         img = tracker.findHands(img)
         lmList, bbox = tracker.findPosition(img)
         if len(lmList) != 0:
-            print(lmList[4])  # Print the position of the thumb tip (id 4)
+            print(tracker.fingersUp())
 
         cT = time.time()
         fps = 1/(cT-pT)
