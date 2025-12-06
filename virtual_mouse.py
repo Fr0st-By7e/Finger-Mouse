@@ -10,6 +10,7 @@ wCam, hCam = 640, 480
 wScr, hScr = autopy.screen.size()
 frameR = 100  # Frame Reduction
 smoothening = 7
+modeList = ["Idle", "Moving", "Clicking", "Scrolling"]
 ##################################
 
 cap = cv2.VideoCapture(0)
@@ -19,6 +20,7 @@ plocX, plocY = 0, 0
 clocX, clocY = 0, 0
 
 pT = 0
+mode = 0
 
 detector = htm.HandTracker(maxHands=1)
 mouse = Controller()
@@ -26,6 +28,7 @@ mouse = Controller()
 while True:
     # Find hand and landmark positions
     success, img = cap.read()
+    mode = 0  # Reset mode to Idle
     img = cv2.flip(img, 1)
     img = detector.findHands(img)
     lmList, bbox = detector.findPosition(img)
@@ -51,6 +54,8 @@ while True:
             clocX = plocX + (x3 - plocX) / smoothening
             clocY = plocY + (y3 - plocY) / smoothening
 
+            mode = 1
+
             # Move Mouse
             try:
                 autopy.mouse.move(clocX, clocY)
@@ -63,22 +68,26 @@ while True:
         # If both index and middle fingers are up: Clicking Mode
         if fingers[1] == 1 and fingers[2] == 1:
             length, img, lineInfo = detector.findDistance(8, 12, img)
+            mode = 2
             if length < 40:
                 cv2.circle(img, (lineInfo[4], lineInfo[5]), 15, (0, 255, 0), cv2.FILLED)
                 autopy.mouse.click()
 
         # If thumb is out and pinky/pinky&ring are up: Scrolling Mode
         if fingers[0] == 1:
+            mode = 3
             if fingers[4] == 1 and fingers[3] == 0:
-                mouse.scroll(0, 20)  # Scroll Up
+                mouse.scroll(0, 1)  # Scroll Up
             elif fingers[4] == 1 and fingers[3] == 1:
-                mouse.scroll(0, -20)  # Scroll Down
+                mouse.scroll(0, -1)  # Scroll Down
 
     # FPS Calculation
     cT = time.time()
     fps = 1/(cT-pT)
     pT = cT
     cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+    if mode != 0:
+        cv2.putText(img, modeList[mode], (600, 70), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 3)
 
 
     # Display
