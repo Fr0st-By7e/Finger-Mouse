@@ -3,6 +3,7 @@ import hand_tracker_module as htm
 import time
 import numpy as np
 import autopy
+from pynput.mouse import Controller
 
 ##################################
 wCam, hCam = 640, 480
@@ -20,6 +21,7 @@ clocX, clocY = 0, 0
 pT = 0
 
 detector = htm.HandTracker(maxHands=1)
+mouse = Controller()
 
 while True:
     # Find hand and landmark positions
@@ -65,6 +67,12 @@ while True:
                 cv2.circle(img, (lineInfo[4], lineInfo[5]), 15, (0, 255, 0), cv2.FILLED)
                 autopy.mouse.click()
 
+        # If thumb is out and pinky/pinky&ring are up: Scrolling Mode
+        if fingers[0] == 1:
+            if fingers[4] == 1 and fingers[3] == 0:
+                mouse.scroll(0, 20)  # Scroll Up
+            elif fingers[4] == 1 and fingers[3] == 1:
+                mouse.scroll(0, -20)  # Scroll Down
 
     # FPS Calculation
     cT = time.time()
