@@ -84,6 +84,7 @@ class HandTracker:
             return length, img, [x1, y1, x2, y2, cx, cy]
 
 
+
 # Dummy test code
 def main():
     cap = cv2.VideoCapture(0)
@@ -98,7 +99,6 @@ def main():
         lmList, bbox = tracker.findPosition(img)
         if len(lmList) != 0:
             print(tracker.fingersUp())
-            print(tracker.thumbUp())
 
         cT = time.time()
         fps = 1/(cT-pT)
